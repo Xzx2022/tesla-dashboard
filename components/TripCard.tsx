@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { formatDuration, calculateDistance, formatDateWithTimezone, generateTripTitleSync } from '@/lib/utils'
+import { Car } from 'lucide-react'
 import type { Trip } from '@/lib/database'
 
 // 安全的数字格式化函数
@@ -32,8 +33,15 @@ interface TripCardProps {
 }
 
 export default function TripCard({ trip }: TripCardProps) {
-  // 直接使用API返回的标题，无需异步加载
-  const tripTitle = trip.trip_title || generateTripTitleSync(trip.start_address, trip.end_address)
+  // 直接使用API返回的标题，应该是包含POI信息的
+  const tripTitle = trip.trip_title || '未知行程'
+  
+  // 添加调试信息（仅在开发环境中）
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Trip ${trip.id} title:`, tripTitle);
+    console.log(`Start detailed address:`, trip.start_detailed_address);
+    console.log(`End detailed address:`, trip.end_detailed_address);
+  }
 
   const distance = trip.distance || calculateDistance(trip.start_km, trip.end_km)
   
@@ -79,8 +87,10 @@ export default function TripCard({ trip }: TripCardProps) {
             <CardTitle className="text-base md:text-lg leading-tight">
               {tripTitle}
             </CardTitle>
-            <div className="text-xs text-muted-foreground">
-              {formatTimeRange()}
+            <div className="flex justify-between items-center">
+              <div className="text-xs text-muted-foreground">
+                {formatTimeRange()}
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -119,7 +129,7 @@ export default function TripCard({ trip }: TripCardProps) {
                           efficiency.isEfficient ? 'text-green-600' : 'text-red-600'
                         }`}
                       >
-                        ({efficiency.isEfficient ? '-' : '+'}{safeToFixed(efficiency.diff)})km
+                        ({efficiency.isEfficient ? '-' : '+'}{safeToFixed(efficiency.diff)}km)
                       </span>
                     )}
                   </div>

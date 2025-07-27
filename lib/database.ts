@@ -1,6 +1,7 @@
 import { Pool, PoolClient } from 'pg'
 import { getAddressesByCoordinatesBatch } from './amap'
 import { simplifyAddress } from './utils'
+import { wgs84ToGcj02 } from './coordinate-transform'
 
 // 数据库连接配置
 let pool: Pool;
@@ -64,8 +65,8 @@ export interface Trip {
 export interface Position {
   id: number
   date: Date
-  latitude: number
-  longitude: number
+  latitude: number | string
+  longitude: number | string
   speed: number | null
   power: number | null
   odometer: number | null
@@ -84,7 +85,7 @@ export interface PaginatedTrips {
 }
 
 // 获取行程列表 (使用TeslaMate的drives表) - 保持原有功能
-export async function getTrips(): Promise<Trip[]> {
+export async function getTrips(carId?: number): Promise<Trip[]> {
   // 构建时返回空数组
   if (process.env.SKIP_DB_CONNECTION === 'true') {
     return [];
@@ -92,7 +93,7 @@ export async function getTrips(): Promise<Trip[]> {
   
   const client = await pool.connect()
   try {
-    const result = await client.query(`
+    let query = `
       SELECT 
         d.id,
         d.start_date,
@@ -159,9 +160,19 @@ export async function getTrips(): Promise<Trip[]> {
         LIMIT 1
       ) end_pos ON true
       WHERE d.end_date IS NOT NULL
-      ORDER BY d.start_date DESC
-      LIMIT 50
-    `)
+    `;
+    
+    const params: any[] = [];
+    
+    // 如果指定了车辆ID，则添加过滤条件
+    if (carId !== undefined) {
+      query += ` AND d.car_id = $1`;
+      params.push(carId);
+    }
+    
+    query += ` ORDER BY d.start_date DESC LIMIT 50`;
+    
+    const result = await client.query(query, params);
     return result.rows
   } finally {
     client.release()
@@ -169,7 +180,7 @@ export async function getTrips(): Promise<Trip[]> {
 }
 
 // 分页获取行程列表
-export async function getTripsPaginated(page: number = 1, limit: number = 10): Promise<PaginatedTrips> {
+export async function getTripsPaginated(page: number = 1, limit: number = 10, carId?: number): Promise<PaginatedTrips> {
   // 构建时返回空数据
   if (process.env.SKIP_DB_CONNECTION === 'true') {
     return {
@@ -184,15 +195,24 @@ export async function getTripsPaginated(page: number = 1, limit: number = 10): P
     const offset = (page - 1) * limit
     
     // 获取总数
-    const countResult = await client.query(`
+    let countQuery = `
       SELECT COUNT(*) as total
       FROM drives d
       WHERE d.end_date IS NOT NULL
-    `)
+    `;
+    const countParams: any[] = [];
+    
+    // 如果指定了车辆ID，则添加过滤条件
+    if (carId !== undefined) {
+      countQuery += ` AND d.car_id = $1`;
+      countParams.push(carId);
+    }
+    
+    const countResult = await client.query(countQuery, countParams);
     const total = parseInt(countResult.rows[0].total)
     
     // 获取分页数据
-    const result = await client.query(`
+    let dataQuery = `
       SELECT 
         d.id,
         d.start_date,
@@ -259,38 +279,51 @@ export async function getTripsPaginated(page: number = 1, limit: number = 10): P
         LIMIT 1
       ) end_pos ON true
       WHERE d.end_date IS NOT NULL
-      ORDER BY d.start_date DESC
-      LIMIT $1 OFFSET $2
-    `, [limit, offset])
+    `;
+    
+    const dataParams: any[] = [];
+    
+    // 如果指定了车辆ID，则添加过滤条件
+    if (carId !== undefined) {
+      dataQuery += ` AND d.car_id = $1`;
+      dataParams.push(carId);
+    }
+    
+    dataQuery += ` ORDER BY d.start_date DESC LIMIT $2 OFFSET $3`;
+    dataParams.push(limit, offset);
+    
+    const result = await client.query(dataQuery, dataParams);
     
     const trips: Trip[] = result.rows
     
-    // 批量获取详细地址
-    if (trips.length > 0) {
-      try {
-        // 准备坐标数据（起始和结束坐标）
-        const coordinates: Array<{ longitude: number | string; latitude: number | string }> = []
-        const coordinateMap: Array<{ tripIndex: number; type: 'start' | 'end' }> = []
-        
-        trips.forEach((trip, index) => {
-          // 添加起始坐标
-          if (trip.start_longitude !== null && trip.start_latitude !== null) {
-            coordinates.push({
-              longitude: trip.start_longitude,
-              latitude: trip.start_latitude
+            // 批量获取详细地址
+        if (trips.length > 0) {
+          try {
+            // 准备坐标数据（起始和结束坐标）
+            const coordinates: Array<{ longitude: number | string; latitude: number | string }> = []
+            const coordinateMap: Array<{ tripIndex: number; type: 'start' | 'end' }> = []
+            
+            trips.forEach((trip, index) => {
+              // 添加起始坐标
+              if (trip.start_longitude !== null && trip.start_latitude !== null) {
+                // 直接使用原始WGS84坐标，getAddressesByCoordinatesBatch函数会处理坐标转换
+                coordinates.push({
+                  longitude: trip.start_longitude,
+                  latitude: trip.start_latitude
+                })
+                coordinateMap.push({ tripIndex: index, type: 'start' })
+              }
+              
+              // 添加结束坐标
+              if (trip.end_longitude !== null && trip.end_latitude !== null) {
+                // 直接使用原始WGS84坐标，getAddressesByCoordinatesBatch函数会处理坐标转换
+                coordinates.push({
+                  longitude: trip.end_longitude,
+                  latitude: trip.end_latitude
+                })
+                coordinateMap.push({ tripIndex: index, type: 'end' })
+              }
             })
-            coordinateMap.push({ tripIndex: index, type: 'start' })
-          }
-          
-          // 添加结束坐标
-          if (trip.end_longitude !== null && trip.end_latitude !== null) {
-            coordinates.push({
-              longitude: trip.end_longitude,
-              latitude: trip.end_latitude
-            })
-            coordinateMap.push({ tripIndex: index, type: 'end' })
-          }
-        })
         
         // 批量获取地址
         if (coordinates.length > 0) {
@@ -312,8 +345,12 @@ export async function getTripsPaginated(page: number = 1, limit: number = 10): P
         
         // 生成行程标题
         trips.forEach(trip => {
-          const startAddr = trip.start_detailed_address || simplifyAddress(trip.start_address)
-          const endAddr = trip.end_detailed_address || simplifyAddress(trip.end_address)
+          const startAddr = (trip.start_detailed_address !== null && trip.start_detailed_address !== undefined) 
+            ? trip.start_detailed_address 
+            : simplifyAddress(trip.start_address);
+          const endAddr = (trip.end_detailed_address !== null && trip.end_detailed_address !== undefined) 
+            ? trip.end_detailed_address 
+            : simplifyAddress(trip.end_address);
           
           if (startAddr === '未知位置' && endAddr === '未知位置') {
             trip.trip_title = '未知行程'
@@ -448,6 +485,8 @@ export async function getTripPositions(tripId: number): Promise<Position[]> {
       WHERE drive_id = $1 
       ORDER BY date ASC
     `, [tripId])
+    
+    // 直接返回原始数据，保持字符串格式以维持精度
     return result.rows
   } finally {
     client.release()

@@ -6,8 +6,9 @@ import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { wgs84ToGcj02 } from '@/lib/coordinate-transform'
 
-interface TripMapProps {
+interface FootprintMapProps {
   positions: Position[]
+  // Removed cityMarkers prop as we no longer show city markers
 }
 
 // 声明全局AMap类型
@@ -15,12 +16,12 @@ declare global {
   interface Window {
     AMap: any
     _AMapSecurityConfig: any
-    initMap?: () => void
-    initFullscreenMap?: () => void
+    initFootprintMap?: () => void
+    initFullscreenFootprintMap?: () => void
   }
 }
 
-export default function TripMap({ positions }: TripMapProps) {
+export default function FootprintMap({ positions }: FootprintMapProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const fullscreenMapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<any>(null)
@@ -31,84 +32,73 @@ export default function TripMap({ positions }: TripMapProps) {
   const createMap = (container: HTMLDivElement, isFullscreenMap = false) => {
     if (!container || positions.length === 0) return null
 
-    // 获取第一个位置点用于设置地图中心
-    const firstPos = positions[0];
-    const rawCenterLng = typeof firstPos.longitude === 'number' ? firstPos.longitude : parseFloat(firstPos.longitude);
-    const rawCenterLat = typeof firstPos.latitude === 'number' ? firstPos.latitude : parseFloat(firstPos.latitude);
+    // 获取所有轨迹点并计算中心点和边界
+    let allPoints: [number, number][] = []
+    const paths: [number, number][][] = []
     
-    // 转换坐标系：WGS84 -> GCJ-02
-    const [centerLng, centerLat] = wgs84ToGcj02(rawCenterLat, rawCenterLng);
-
-    const map = new window.AMap.Map(container, {
-      zoom: 13,
-      center: [centerLng, centerLat],
-      mapStyle: 'amap://styles/normal',
-      zoomEnable: isFullscreenMap, // 全屏模式启用缩放
-      dragEnable: isFullscreenMap, // 全屏模式启用拖拽
+    // 按drive_id分组轨迹
+    const groupedPositions: Record<number, Position[]> = {}
+    positions.forEach(pos => {
+      if (!groupedPositions[pos.drive_id]) {
+        groupedPositions[pos.drive_id] = []
+      }
+      groupedPositions[pos.drive_id].push(pos)
     })
-
-    // 创建轨迹点数组，直接使用原始值以保持精度，并转换坐标系
-    const path = positions.map(pos => {
-      const rawLng = typeof pos.longitude === 'number' ? pos.longitude : parseFloat(pos.longitude);
-      const rawLat = typeof pos.latitude === 'number' ? pos.latitude : parseFloat(pos.latitude);
-      // 转换坐标系：WGS84 -> GCJ-02
-      const [gcjLng, gcjLat] = wgs84ToGcj02(rawLat, rawLng);
-      return [gcjLng, gcjLat];
+    
+    // 处理每条轨迹
+    Object.values(groupedPositions).forEach(tripPositions => {
+      if (tripPositions.length > 0) {
+        const path = tripPositions.map(pos => {
+          const rawLng = typeof pos.longitude === 'number' ? pos.longitude : parseFloat(pos.longitude);
+          const rawLat = typeof pos.latitude === 'number' ? pos.latitude : parseFloat(pos.latitude);
+          // 转换坐标系：WGS84 -> GCJ-02
+          const [gcjLng, gcjLat] = wgs84ToGcj02(rawLat, rawLng);
+          allPoints.push([gcjLng, gcjLat]);
+          return [gcjLng, gcjLat] as [number, number];
+        });
+        paths.push(path);
+      }
     });
 
-    // 添加起点标记
-    const rawStartLng = typeof firstPos.longitude === 'number' ? firstPos.longitude : parseFloat(firstPos.longitude);
-    const rawStartLat = typeof firstPos.latitude === 'number' ? firstPos.latitude : parseFloat(firstPos.latitude);
-    // 转换坐标系：WGS84 -> GCJ-02
-    const [startLng, startLat] = wgs84ToGcj02(rawStartLat, rawStartLng);
-    
-    const startMarker = new window.AMap.Marker({
-      position: [startLng, startLat],
-      title: '起点',
-      icon: new window.AMap.Icon({
-        size: new window.AMap.Size(25, 34),
-        image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
-        imageOffset: new window.AMap.Pixel(-9, -34),
-      }),
-    })
+    if (allPoints.length === 0) return null;
 
-    // 添加终点标记
-    if (positions.length > 1) {
-      const lastPos = positions[positions.length - 1];
-      const rawEndLng = typeof lastPos.longitude === 'number' ? lastPos.longitude : parseFloat(lastPos.longitude);
-      const rawEndLat = typeof lastPos.latitude === 'number' ? lastPos.latitude : parseFloat(lastPos.latitude);
-      // 转换坐标系：WGS84 -> GCJ-02
-      const [endLng, endLat] = wgs84ToGcj02(rawEndLat, rawEndLng);
-      
-      const endMarker = new window.AMap.Marker({
-        position: [endLng, endLat],
-        title: '终点',
-        icon: new window.AMap.Icon({
-          size: new window.AMap.Size(25, 34),
-          image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-          imageOffset: new window.AMap.Pixel(-9, -34),
-        }),
-      })
-      map.add(endMarker)
+    // 计算中心点 - 使用更安全的方法避免栈溢出
+    let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
+    for (const [lng, lat] of allPoints) {
+      minLat = Math.min(minLat, lat);
+      maxLat = Math.max(maxLat, lat);
+      minLng = Math.min(minLng, lng);
+      maxLng = Math.max(maxLng, lng);
     }
+    const centerLat = (minLat + maxLat) / 2;
+    const centerLng = (minLng + maxLng) / 2;
 
-    map.add(startMarker)
-
-    // 绘制轨迹线
-    const polyline = new window.AMap.Polyline({
-      path: path,
-      borderWeight: 5,
-      strokeColor: '#1890ff',
-      strokeWeight: 4,
-      strokeOpacity: 0.8,
-      lineJoin: 'round',
-      lineCap: 'round',
+    const map = new window.AMap.Map(container, {
+      zoom: 5, // 中国全图级别
+      center: [centerLng, centerLat],
+      mapStyle: 'amap://styles/normal',
+      zoomEnable: isFullscreenMap,
+      dragEnable: isFullscreenMap,
     })
 
-    map.add(polyline)
+    // 绘制所有轨迹线
+    paths.forEach((path, index) => {
+      const polyline = new window.AMap.Polyline({
+        path: path,
+        borderWeight: 2,
+        strokeColor: '#1890ff',
+        strokeWeight: 3,
+        strokeOpacity: 0.6,
+        lineJoin: 'round',
+        lineCap: 'round',
+      })
+      map.add(polyline)
+    })
 
-    // 自适应显示轨迹
-    map.setFitView([startMarker, polyline])
+    // 自适应显示所有轨迹
+    if (allPoints.length > 0) {
+      map.setFitView()
+    }
 
     return map
   }
@@ -121,18 +111,18 @@ export default function TripMap({ positions }: TripMapProps) {
 
     // 动态加载高德地图API
     const script = document.createElement('script')
-    script.src = `https://webapi.amap.com/maps?v=1.4.15&key=${process.env.NEXT_PUBLIC_AMAP_KEY}&callback=initMap`
+    script.src = `https://webapi.amap.com/maps?v=1.4.15&key=${process.env.NEXT_PUBLIC_AMAP_KEY}&callback=initFootprintMap`
     script.async = true
     
     // 初始化小地图
-    window.initMap = () => {
+    window.initFootprintMap = () => {
       if (mapRef.current) {
         mapInstance.current = createMap(mapRef.current, false)
       }
     }
 
     // 初始化全屏地图
-    window.initFullscreenMap = () => {
+    window.initFullscreenFootprintMap = () => {
       if (fullscreenMapRef.current) {
         fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true)
       }
@@ -148,8 +138,8 @@ export default function TripMap({ positions }: TripMapProps) {
       if (fullscreenMapInstance.current) {
         fullscreenMapInstance.current.destroy()
       }
-      delete window.initMap
-      delete window.initFullscreenMap
+      delete window.initFootprintMap
+      delete window.initFullscreenFootprintMap
       const scriptToRemove = document.querySelector(`script[src*="webapi.amap.com"]`)
       if (scriptToRemove && document.head.contains(scriptToRemove)) {
         document.head.removeChild(scriptToRemove)
@@ -246,4 +236,4 @@ export default function TripMap({ positions }: TripMapProps) {
       )}
     </>
   )
-} 
+}

@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { getAddressByCoordinate } from './amap'
+import { wgs84ToGcj02 } from './coordinate-transform'
  
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -70,17 +71,18 @@ export async function getEnhancedAddress(
   // 如果有坐标，尝试使用高德API获取详细地址
   if (longitude && latitude) {
     try {
-      const detailedAddress = await getAddressByCoordinate(longitude, latitude)
+      // 直接传入原始坐标，getAddressByCoordinate函数会处理坐标转换
+      const detailedAddress = await getAddressByCoordinate(longitude, latitude);
       if (detailedAddress && detailedAddress !== '未知位置') {
-        return detailedAddress
+        return detailedAddress;
       }
     } catch (error) {
-      console.warn('获取详细地址失败，使用数据库地址:', error)
+      console.warn('获取详细地址失败，使用数据库地址:', error);
     }
   }
   
   // 回退到数据库地址
-  return simplifyAddress(databaseAddress)
+  return simplifyAddress(databaseAddress);
 }
 
 // 生成行程摘要标题 - 支持异步地址获取
