@@ -31,57 +31,57 @@ export default function TripMap({ positions }: TripMapProps) {
     if (!container || positions.length === 0) return null
 
     const map = new window.AMap.Map(container, {
-      zoom: 13,
-      center: [positions[0].longitude, positions[0].latitude],
-      mapStyle: 'amap://styles/normal',
+          zoom: 13,
+          center: [positions[0].longitude, positions[0].latitude],
+          mapStyle: 'amap://styles/normal',
       zoomEnable: isFullscreenMap, // 全屏模式启用缩放
       dragEnable: isFullscreenMap, // 全屏模式启用拖拽
-    })
+        })
 
-    // 创建轨迹点数组
-    const path = positions.map(pos => [pos.longitude, pos.latitude])
+        // 创建轨迹点数组
+        const path = positions.map(pos => [pos.longitude, pos.latitude])
 
-    // 添加起点标记
-    const startMarker = new window.AMap.Marker({
-      position: [positions[0].longitude, positions[0].latitude],
-      title: '起点',
-      icon: new window.AMap.Icon({
-        size: new window.AMap.Size(25, 34),
-        image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
-        imageOffset: new window.AMap.Pixel(-9, -34),
-      }),
-    })
+        // 添加起点标记
+        const startMarker = new window.AMap.Marker({
+          position: [positions[0].longitude, positions[0].latitude],
+          title: '起点',
+          icon: new window.AMap.Icon({
+            size: new window.AMap.Size(25, 34),
+            image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
+            imageOffset: new window.AMap.Pixel(-9, -34),
+          }),
+        })
 
-    // 添加终点标记
-    if (positions.length > 1) {
-      const endMarker = new window.AMap.Marker({
-        position: [positions[positions.length - 1].longitude, positions[positions.length - 1].latitude],
-        title: '终点',
-        icon: new window.AMap.Icon({
-          size: new window.AMap.Size(25, 34),
-          image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-          imageOffset: new window.AMap.Pixel(-9, -34),
-        }),
-      })
+        // 添加终点标记
+        if (positions.length > 1) {
+          const endMarker = new window.AMap.Marker({
+            position: [positions[positions.length - 1].longitude, positions[positions.length - 1].latitude],
+            title: '终点',
+            icon: new window.AMap.Icon({
+              size: new window.AMap.Size(25, 34),
+              image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
+              imageOffset: new window.AMap.Pixel(-9, -34),
+            }),
+          })
       map.add(endMarker)
-    }
+        }
 
     map.add(startMarker)
 
-    // 绘制轨迹线
-    const polyline = new window.AMap.Polyline({
-      path: path,
-      borderWeight: 5,
-      strokeColor: '#1890ff',
-      strokeWeight: 4,
-      strokeOpacity: 0.8,
-      lineJoin: 'round',
-      lineCap: 'round',
-    })
+        // 绘制轨迹线
+        const polyline = new window.AMap.Polyline({
+          path: path,
+          borderWeight: 5,
+          strokeColor: '#1890ff',
+          strokeWeight: 4,
+          strokeOpacity: 0.8,
+          lineJoin: 'round',
+          lineCap: 'round',
+        })
 
     map.add(polyline)
 
-    // 自适应显示轨迹
+        // 自适应显示轨迹
     map.setFitView([startMarker, polyline])
 
     return map

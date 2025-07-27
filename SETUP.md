@@ -122,13 +122,80 @@ npm run dev
 
 ## 生产部署
 
-### 1. 构建项目
+### Docker 部署（推荐）
+
+为了减少部署包大小，我们使用多阶段构建和Next.js的独立构建输出功能，使镜像大小从1.69GB减小到了约150MB。
+
+#### 构建优化的Docker镜像
+
+```bash
+# 根据你的目标平台选择以下命令之一：
+# 对于AMD64平台（大多数x86服务器和NAS）：
+docker build --platform linux/amd64 -t hushaopeng/tesla-dashboard-lite:amd64 .
+
+# 对于ARM64平台（如树莓派或某些NAS）：
+docker build --platform linux/arm64 -t hushaopeng/tesla-dashboard-lite:arm64 .
+```
+
+#### 导出镜像用于手动部署
+
+```bash
+# 导出镜像为tar文件
+docker save hushaopeng/tesla-dashboard-lite:amd64 -o tesla-dashboard-lite-amd64.tar
+# 或者对于ARM64：
+docker save hushaopeng/tesla-dashboard-lite:arm64 -o tesla-dashboard-lite-arm64.tar
+```
+
+#### 在目标服务器上加载和运行
+
+```bash
+# 在目标服务器上加载镜像
+docker load -i tesla-dashboard-lite-amd64.tar
+
+# 运行容器（确保替换环境变量为你的实际配置）
+docker run -d \
+  --name tesla-dashboard \
+  -p 3333:3333 \
+  -e DB_HOST=your_db_host \
+  -e DB_PORT=5432 \
+  -e DB_NAME=teslamate \
+  -e DB_USER=teslamate \
+  -e DB_PASSWORD=your_password \
+  -e NEXT_PUBLIC_AMAP_KEY=your_amap_api_key \
+  hushaopeng/tesla-dashboard-lite:amd64
+```
+
+### 使用 Docker Compose 部署完整 TeslaMate 套件
+
+项目包含一个完整的 `docker-compose.yml` 文件，可用于部署包含 TeslaMate、PostgreSQL、Grafana、Mosquitto 和 Tesla Dashboard 的完整套件。
+
+1. 确保你已经配置了高德地图 API Key（在 docker-compose.yml 中替换 `NEXT_PUBLIC_AMAP_KEY` 的值）
+
+2. （可选）创建 PostgreSQL 配置文件：
+   ```bash
+   mkdir -p config
+   # 添加你的 postgresql.conf 和 pg_hba.conf 文件到 config 目录
+   ```
+
+3. 启动所有服务：
+   ```bash
+   docker-compose up -d
+   ```
+
+4. 访问各个服务：
+   - TeslaMate: http://localhost:4000
+   - Grafana: http://localhost:3000
+   - Tesla Dashboard: http://localhost:3333
+
+### 传统部署方式
+
+#### 1. 构建项目
 
 ```bash
 npm run build
 ```
 
-### 2. 启动生产服务器
+#### 2. 启动生产服务器
 
 ```bash
 npm start
@@ -138,7 +205,7 @@ npm start
 
 ```bash
 npm install -g pm2
-pm2 start npm --name "tesla-dashboard" -- start
+npm2 start npm --name "tesla-dashboard" -- start
 pm2 save
 pm2 startup
 ```

@@ -20,8 +20,8 @@
 
 ## 环境要求
 
-- Node.js 18 或更高版本
-- TeslaMate 已部署并运行
+- Node.js 18 或更高版本（使用 Docker 部署时不需要本地安装）
+- TeslaMate 已部署并运行（使用 Docker 部署时会自动包含数据库）
 - 高德地图 API 密钥
 
 ## 安装步骤
@@ -75,6 +75,27 @@ npm run start
 ```
 
 访问 http://localhost:3000 查看应用。
+
+### 6. Docker 部署（推荐）
+
+项目支持 Docker 部署，包含完整的 TeslaMate 数据库环境：
+
+```bash
+# 1. 复制环境变量示例文件并修改配置
+cp .env.example .env
+# 编辑 .env 文件，填入实际的配置值
+
+# 2. 构建并启动所有服务
+docker-compose up -d
+
+# 3. 查看日志
+docker-compose logs -f
+
+# 4. 停止服务
+docker-compose down
+```
+
+访问 http://localhost:3333 查看应用。
 
 ## 目录结构
 

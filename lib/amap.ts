@@ -161,7 +161,7 @@ function simplifyAmapAddress(formattedAddress: string, addressComponent?: any): 
         ) {
           simplified = extractedPOI
           break
-        }
+      }
       }
     }
     
@@ -197,13 +197,13 @@ function simplifyAmapAddress(formattedAddress: string, addressComponent?: any): 
   // 如果简化后为空或者过短，尝试使用addressComponent信息
   if (!simplified || simplified.length < 2) {
     if (addressComponent) {
-      const fallbackParts = [
-        addressComponent.district,
-        addressComponent.township,
-        addressComponent.street
-      ].filter(part => part && part !== '[]' && part.length > 0)
-      
-      simplified = fallbackParts.join('') || '未知位置'
+    const fallbackParts = [
+      addressComponent.district,
+      addressComponent.township,
+      addressComponent.street
+    ].filter(part => part && part !== '[]' && part.length > 0)
+    
+    simplified = fallbackParts.join('') || '未知位置'
     } else {
       simplified = '未知位置'
     }

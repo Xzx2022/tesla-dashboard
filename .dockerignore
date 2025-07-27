@@ -1,0 +1,42 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+
+# Environment files
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git files
+.git
+.gitignore
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker files (avoid including docker files in docker image)
+Dockerfile*
+.dockerignore
+docker-compose.yml
+
+# System files
+.DS_Store
+
+# Development files
+**/*.test.js
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.js
+**/*.spec.ts
+**/*.spec.tsx
+coverage/

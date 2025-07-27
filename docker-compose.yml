@@ -1,0 +1,83 @@
+version: "3"
+
+services:
+  teslamate:
+    image: ccr.ccs.tencentyun.com/dhuar/teslamate:latest
+    restart: always
+    environment:
+      - ENCRYPTION_KEY=123456
+      - DATABASE_USER=teslamate
+      - DATABASE_PASS=123456
+      - DATABASE_NAME=teslamate
+      - DATABASE_HOST=database
+      - MQTT_HOST=mosquitto
+      - TZ=Asia/Shanghai
+    ports:
+      - 4000:4000
+    volumes:
+      - ./import:/opt/app/import
+    cap_drop:
+      - all
+
+  database:
+    image: postgres:16.7
+    restart: always
+    environment:
+      - POSTGRES_USER=teslamate
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=teslamate
+    # ports:
+    #   - 5432:5432
+    volumes:
+      - teslamate-db:/var/lib/postgresql/data
+      - ./config/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./config/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    
+  grafana:
+    image: ccr.ccs.tencentyun.com/dhuar/grafana:latest
+    restart: always
+    environment:
+      - DATABASE_USER=teslamate
+      - DATABASE_PASS=123456
+      - DATABASE_NAME=teslamate
+      - DATABASE_HOST=database
+    ports:
+      - 3000:3000
+    volumes:
+      - teslamate-grafana-data:/var/lib/grafana
+
+  mosquitto:
+    image: ccr.ccs.tencentyun.com/dhuar/eclipse-mosquitto:2
+    restart: always
+    command: mosquitto -c /mosquitto-no-auth.conf
+    # ports:
+    #   - 1883:1883
+    volumes:
+      - mosquitto-conf:/mosquitto/config
+      - mosquitto-data:/mosquitto/data
+
+  tesla-dashboard:
+    image: hushaopeng/tesla-dashboard-lite:amd64
+    ports:
+      - "3333:3333"
+    environment:
+      - SKIP_DB_CONNECTION=false
+      # 数据库配置
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=teslamate
+      - DB_USER=teslamate
+      - DB_PASSWORD=123456
+
+      # 高德地图 API 配置 修改为自己的高德API
+      - NEXT_PUBLIC_AMAP_KEY=xxxxx
+
+      # 时区配置
+      - TZ=Asia/Shanghai
+
+volumes:
+  teslamate-db:
+  teslamate-grafana-data:
+  mosquitto-conf:
+  mosquitto-data:

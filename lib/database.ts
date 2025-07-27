@@ -3,13 +3,21 @@ import { getAddressesByCoordinatesBatch } from './amap'
 import { simplifyAddress } from './utils'
 
 // 数据库连接配置
-const pool = new Pool({
-  user: process.env.DB_USER || 'teslamate',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'teslamate',
-  password: process.env.DB_PASSWORD || 'password',
-  port: parseInt(process.env.DB_PORT || '5432'),
-})
+let pool: Pool;
+
+// 只在运行时创建数据库连接池，构建时跳过
+if (process.env.SKIP_DB_CONNECTION !== 'true') {
+  pool = new Pool({
+    user: process.env.DB_USER || 'teslamate',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'teslamate',
+    password: process.env.DB_PASSWORD || 'password',
+    port: parseInt(process.env.DB_PORT || '5432'),
+  });
+} else {
+  // 构建时使用空对象
+  pool = {} as Pool;
+}
 
 export { pool }
 
@@ -77,6 +85,11 @@ export interface PaginatedTrips {
 
 // 获取行程列表 (使用TeslaMate的drives表) - 保持原有功能
 export async function getTrips(): Promise<Trip[]> {
+  // 构建时返回空数组
+  if (process.env.SKIP_DB_CONNECTION === 'true') {
+    return [];
+  }
+  
   const client = await pool.connect()
   try {
     const result = await client.query(`
@@ -157,6 +170,15 @@ export async function getTrips(): Promise<Trip[]> {
 
 // 分页获取行程列表
 export async function getTripsPaginated(page: number = 1, limit: number = 10): Promise<PaginatedTrips> {
+  // 构建时返回空数据
+  if (process.env.SKIP_DB_CONNECTION === 'true') {
+    return {
+      trips: [],
+      hasMore: false,
+      total: 0
+    };
+  }
+  
   const client = await pool.connect()
   try {
     const offset = (page - 1) * limit
@@ -325,6 +347,11 @@ export async function getTripsPaginated(page: number = 1, limit: number = 10): P
 
 // 根据ID获取行程详情
 export async function getTripById(id: number): Promise<Trip | null> {
+  // 构建时返回null
+  if (process.env.SKIP_DB_CONNECTION === 'true') {
+    return null;
+  }
+  
   const client = await pool.connect()
   try {
     const result = await client.query(`
@@ -403,6 +430,11 @@ export async function getTripById(id: number): Promise<Trip | null> {
 
 // 获取行程的位置数据（用于绘制轨迹）
 export async function getTripPositions(tripId: number): Promise<Position[]> {
+  // 构建时返回空数组
+  if (process.env.SKIP_DB_CONNECTION === 'true') {
+    return [];
+  }
+  
   const client = await pool.connect()
   try {
     const result = await client.query(`
