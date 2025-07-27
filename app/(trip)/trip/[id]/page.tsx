@@ -98,14 +98,14 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
               </Button>
             </Link>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl md:text-3xl font-bold tracking-tight leading-tight break-words">{tripTitle}</h1>
-              {car && (
-                <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                  <Car className="h-4 w-4" />
-                  <span>{car.name || `车辆 ${car.id}`}</span>
-                </div>
-              )}
-            </div>
+            <h1 className="text-xl md:text-3xl font-bold tracking-tight leading-tight break-words" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>{tripTitle}</h1>
+            {car && (
+              <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
+                <Car className="h-4 w-4" />
+                <span>{car.name || `车辆 ${car.id}`}</span>
+              </div>
+            )}
+          </div>
           </div>
         </div>
       </header>
@@ -115,7 +115,7 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
           {/* 行程信息卡片 */}
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="flex items-center gap-2 text-lg">
+              <CardTitle className="flex items-center gap-2 text-lg" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <MapPin className="h-5 w-5" />
                 行程信息
               </CardTitle>
@@ -234,7 +234,7 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
           {/* 地图卡片 */}
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">行驶轨迹</CardTitle>
+              <CardTitle className="text-lg" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>行驶轨迹</CardTitle>
               <CardDescription className="text-sm">基于GPS数据的行驶路线</CardDescription>
             </CardHeader>
             <CardContent>
@@ -249,64 +249,11 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
         {positions.length > 0 && (
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">数据分析</CardTitle>
+              <CardTitle className="text-lg" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>数据分析</CardTitle>
               <CardDescription className="text-sm">行程中的详细数据和趋势分析</CardDescription>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="charts" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="charts" className="flex items-center gap-2 text-sm">
-                    <BarChart3 className="h-4 w-4" />
-                    <span className="hidden sm:inline">图表分析</span>
-                    <span className="sm:hidden">图表</span>
-                  </TabsTrigger>
-                  <TabsTrigger value="table" className="flex items-center gap-2 text-sm">
-                    <Table className="h-4 w-4" />
-                    <span className="hidden sm:inline">数据表格</span>
-                    <span className="sm:hidden">表格</span>
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="charts" className="mt-6">
-                  <TripCharts positions={positions} />
-                </TabsContent>
-                
-                <TabsContent value="table" className="mt-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left p-2 text-xs">时间</th>
-                          <th className="text-left p-2 text-xs">速度</th>
-                          <th className="text-left p-2 text-xs">电量</th>
-                          <th className="text-left p-2 text-xs hidden sm:table-cell">里程</th>
-                          <th className="text-left p-2 text-xs hidden sm:table-cell">温度</th>
-                          <th className="text-left p-2 text-xs hidden md:table-cell">功率</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {positions.slice(0, 20).map((position) => (
-                          <tr key={position.id} className="border-b">
-                            <td className="p-2 text-xs">
-                              {format(formatDateWithTimezone(position.date), 'HH:mm:ss', { locale: zhCN })}
-                            </td>
-                            <td className="p-2 text-xs">{position.speed || 'N/A'}</td>
-                            <td className="p-2 text-xs">{position.battery_level || 'N/A'}%</td>
-                            <td className="p-2 text-xs hidden sm:table-cell">{position.odometer || 'N/A'}</td>
-                            <td className="p-2 text-xs hidden sm:table-cell">{position.outside_temp || 'N/A'}°C</td>
-                            <td className="p-2 text-xs hidden md:table-cell">{position.power || 'N/A'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {positions.length > 20 && (
-                      <p className="text-xs text-muted-foreground mt-4 text-center">
-                        显示前20条记录，共{positions.length}条数据
-                      </p>
-                    )}
-                  </div>
-                </TabsContent>
-              </Tabs>
+              <TripCharts positions={positions} />
             </CardContent>
           </Card>
         )}

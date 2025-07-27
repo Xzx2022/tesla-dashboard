@@ -134,7 +134,7 @@ export default function Home() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">行程记录</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>行程记录</h2>
         <div className="flex gap-2">
           <Button
             variant={activeTab === 'trips' ? 'default' : 'outline'}

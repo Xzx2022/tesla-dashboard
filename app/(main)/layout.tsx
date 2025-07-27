@@ -7,7 +7,7 @@ import TeslaT from '@/components/TeslaT'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Tesla 仪表板',
+  title: 'Tesla',
   description: '基于 TeslaMate 数据的现代化 Tesla 仪表板',
 }
 
@@ -22,8 +22,7 @@ export default function MainLayout({
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold flex items-center gap-2">
-              <TeslaT />
-              Tesla 仪表板
+              My Tesla
             </h1>
             <div className="w-48">
               <VehicleSelector />

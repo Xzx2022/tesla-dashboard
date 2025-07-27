@@ -214,7 +214,7 @@ export default function FootprintMap({ positions }: FootprintMapProps) {
 
       {/* 全屏模态 */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
           <div className="relative w-full h-full max-w-6xl max-h-full bg-white rounded-lg overflow-hidden">
             {/* 控制按钮 */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">

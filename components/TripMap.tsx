@@ -66,10 +66,11 @@ export default function TripMap({ positions }: TripMapProps) {
       position: [startLng, startLat],
       title: '起点',
       icon: new window.AMap.Icon({
-        size: new window.AMap.Size(25, 34),
+        size: new window.AMap.Size(20, 26),
         image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-default.png',
-        imageOffset: new window.AMap.Pixel(-9, -34),
+        imageSize: new window.AMap.Size(20, 26),
       }),
+      offset: new window.AMap.Pixel(-9, -23),
     })
 
     // 添加终点标记
@@ -84,10 +85,11 @@ export default function TripMap({ positions }: TripMapProps) {
         position: [endLng, endLat],
         title: '终点',
         icon: new window.AMap.Icon({
-          size: new window.AMap.Size(25, 34),
+          size: new window.AMap.Size(20, 26),
           image: '//a.amap.com/jsapi_demos/static/demo-center/icons/poi-marker-red.png',
-          imageOffset: new window.AMap.Pixel(-9, -34),
+          imageSize: new window.AMap.Size(20, 26),
         }),
+        offset: new window.AMap.Pixel(-9, -23),
       })
       map.add(endMarker)
     }
@@ -224,7 +226,7 @@ export default function TripMap({ positions }: TripMapProps) {
 
       {/* 全屏模态 */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
           <div className="relative w-full h-full max-w-6xl max-h-full bg-white rounded-lg overflow-hidden">
             {/* 控制按钮 */}
             <div className="absolute top-4 right-4 z-10 flex gap-2">
@@ -246,4 +248,4 @@ export default function TripMap({ positions }: TripMapProps) {
       )}
     </>
   )
-} 
+}

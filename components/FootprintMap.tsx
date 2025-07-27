@@ -104,7 +104,7 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
         <div className="lg:col-span-1 space-y-4">
           <div className="border rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="font-medium flex items-center gap-2">
+              <h3 className="font-medium flex items-center gap-2" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <MapPin className="h-4 w-4" />
                 城市足迹 ({cities.length})
               </h3>
@@ -145,7 +145,7 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
         <div className="lg:col-span-2 space-y-4">
           <div className="border rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b">
-              <h3 className="font-medium flex items-center gap-2">
+              <h3 className="font-medium flex items-center gap-2" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <Route className="h-4 w-4" />
                 行驶轨迹
               </h3>
@@ -157,7 +157,7 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-2 flex items-center gap-2">
+              <h3 className="font-medium mb-2 flex items-center gap-2" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <Route className="h-4 w-4" />
                 轨迹统计
               </h3>
@@ -168,7 +168,7 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
             </div>
             
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-2 flex items-center gap-2">
+              <h3 className="font-medium mb-2 flex items-center gap-2" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <MapPin className="h-4 w-4" />
                 覆盖范围
               </h3>
@@ -179,7 +179,7 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
             </div>
             
             <div className="border rounded-lg p-4">
-              <h3 className="font-medium mb-2 flex items-center gap-2">
+              <h3 className="font-medium mb-2 flex items-center gap-2" style={{ fontFamily: 'AlibabaPuHuiTi, sans-serif' }}>
                 <Calendar className="h-4 w-4" />
                 时间跨度
               </h3>
