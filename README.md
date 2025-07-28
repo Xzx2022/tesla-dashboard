@@ -91,7 +91,7 @@ services:
       - mosquitto-data:/mosquitto/data
 
   tesla-dashboard:
-    image: hushaopeng/tesla-dashboard-lite:latest
+    image: hushaopeng/tesla-dashboard-lite:amd64
     ports:
       - "3333:3333"
     environment:
@@ -118,6 +118,11 @@ volumes:
 然后运行：
 
 ```bash
+# 拉取所有镜像
+docker-compose pull
+# 部分nas命令为
+# docker compose pull
+
 # 启动所有服务
 docker-compose up -d
 # 部分nas命令为
