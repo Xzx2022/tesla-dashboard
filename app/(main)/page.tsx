@@ -106,6 +106,9 @@ export default function Home() {
 
   // 滚动监听
   useEffect(() => {
+    // 只在行程列表标签页激活时才监听滚动事件
+    if (activeTab !== 'trips') return;
+
     const handleScroll = () => {
       if (
         window.innerHeight + document.documentElement.scrollTop >= 
@@ -117,7 +120,7 @@ export default function Home() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [loadMore])
+  }, [loadMore, activeTab])
 
   if (error) {
     return (

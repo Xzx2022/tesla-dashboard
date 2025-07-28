@@ -4,8 +4,7 @@ import type { Trip } from '@/lib/database'
 import { format } from 'date-fns'
 import { zhCN } from 'date-fns/locale'
 import { formatDateWithTimezone } from '@/lib/utils'
-import { Battery, Zap, Minus } from 'lucide-react'
-import { TEXT_COLORS } from '@/lib/constants'
+import { Battery, BatteryMedium, Zap, Minus } from 'lucide-react'
 
 interface EnergyChangeCardProps {
   prevTrip: Trip  // 时间上较早的行程
@@ -58,15 +57,15 @@ export default function EnergyChangeCard({ prevTrip, nextTrip }: EnergyChangeCar
   if (energyChange !== null) {
     if (energyChange > 0) {
       changeType = '静息损耗'
-      changeColor = TEXT_COLORS.ENERGY_CONSUMPTION
-      IconComponent = Battery
+      changeColor = 'text-red-500'
+      IconComponent = BatteryMedium
     } else if (energyChange < 0) {
       changeType = '充电'
-      changeColor = TEXT_COLORS.ENERGY_CHARGING
+      changeColor = 'text-green-500'
       IconComponent = Zap
     } else {
       changeType = '无变化'
-      changeColor = TEXT_COLORS.ENERGY_NEUTRAL
+      changeColor = 'text-gray-500'
       IconComponent = Battery
     }
   }
