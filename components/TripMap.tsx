@@ -26,6 +26,8 @@ export default function TripMap({ positions }: TripMapProps) {
   const mapInstance = useRef<any>(null)
   const fullscreenMapInstance = useRef<any>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  // 保存全屏地图初始化的timeout引用
+  const fullscreenInitTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 创建地图的通用函数
   const createMap = (container: HTMLDivElement, isFullscreenMap = false) => {
@@ -150,6 +152,10 @@ export default function TripMap({ positions }: TripMapProps) {
       if (fullscreenMapInstance.current) {
         fullscreenMapInstance.current.destroy()
       }
+      // 清理全屏地图初始化的timeout
+      if (fullscreenInitTimeoutRef.current) {
+        clearTimeout(fullscreenInitTimeoutRef.current)
+      }
       delete window.initMap
       delete window.initFullscreenMap
       const scriptToRemove = document.querySelector(`script[src*="webapi.amap.com"]`)
@@ -163,7 +169,7 @@ export default function TripMap({ positions }: TripMapProps) {
   const openFullscreen = () => {
     setIsFullscreen(true)
     // 延迟初始化全屏地图，确保DOM已渲染
-    setTimeout(() => {
+    fullscreenInitTimeoutRef.current = setTimeout(() => {
       if (window.AMap && fullscreenMapRef.current) {
         fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true)
       }
@@ -172,6 +178,12 @@ export default function TripMap({ positions }: TripMapProps) {
 
   // 关闭全屏地图
   const closeFullscreen = () => {
+    // 清理全屏地图初始化的timeout
+    if (fullscreenInitTimeoutRef.current) {
+      clearTimeout(fullscreenInitTimeoutRef.current)
+      fullscreenInitTimeoutRef.current = null
+    }
+    
     if (fullscreenMapInstance.current) {
       fullscreenMapInstance.current.destroy()
       fullscreenMapInstance.current = null

@@ -110,6 +110,11 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
   
   // 当selectedCarId变化时重置状态
   useEffect(() => {
+    // 取消之前的请求
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+    }
+    
     // 重置状态
     setFootprintData({
       cities: [],
@@ -122,6 +127,16 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
     setError(null);
   }, [selectedCarId]);
   
+  // 组件卸载时清理
+  useEffect(() => {
+    return () => {
+      // 取消正在进行的请求
+      if (fetchControllerRef.current) {
+        fetchControllerRef.current.abort();
+      }
+    };
+  }, []);
+  
   // 当页码或selectedCarId变化时加载数据
   useEffect(() => {
     loadFootprintData();
@@ -129,16 +144,23 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
   
   // 自动加载下一批数据（如果还有数据且未在加载中）
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    
     if (footprintData.hasNextPage && !isLoadingRef.current) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         loadFootprintData();
       }, 100); // 短暂延迟以避免过于频繁的请求
-      
-      return () => clearTimeout(timer);
     } else if (!footprintData.hasNextPage && isLoadingRef.current === false && loading === true) {
       // 所有数据加载完成，设置loading为false
       setLoading(false);
     }
+    
+    // 清理函数
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [footprintData.hasNextPage, loadFootprintData, loading]);
 
   const { cities, positions, totalCount } = footprintData
