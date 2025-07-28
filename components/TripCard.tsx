@@ -8,6 +8,7 @@ import { zhCN } from 'date-fns/locale'
 import { formatDuration, calculateDistance, formatDateWithTimezone, generateTripTitleSync } from '@/lib/utils'
 import { Car } from 'lucide-react'
 import type { Trip } from '@/lib/database'
+import { TEXT_COLORS } from '@/lib/constants'
 
 // 安全的数字格式化函数
 function safeToFixed(value: any, digits: number = 1): string {
@@ -125,12 +126,12 @@ export default function TripCard({ trip }: TripCardProps) {
                     <span>{safeToFixed(energyConsumed, 1)} km</span>
                     {efficiency && (
                       <span 
-                        className={`text-xs ${
-                          efficiency.isEfficient ? 'text-green-600' : 'text-red-600'
-                        }`}
-                      >
-                        ({efficiency.isEfficient ? '-' : '+'}{safeToFixed(efficiency.diff)}km)
-                      </span>
+                      className={`text-xs ${
+                        efficiency.isEfficient ? TEXT_COLORS.ENERGY_CHARGING : TEXT_COLORS.ENERGY_CONSUMPTION
+                      }`}
+                    >
+                      ({efficiency.isEfficient ? '节省' : '多耗'}{safeToFixed(efficiency.diff)}km)
+                    </span>
                     )}
                   </div>
                 ) : (

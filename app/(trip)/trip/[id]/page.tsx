@@ -24,6 +24,7 @@ import {
 import TripMap from '@/components/TripMap'
 import TripCharts from '@/components/TripCharts'
 import { formatDuration, calculateDistance, formatDateWithTimezone, generateTripTitle } from '@/lib/utils'
+import { TEXT_COLORS } from '@/lib/constants'
 
 // 安全的数字格式化函数
 function safeToFixed(value: any, digits: number = 1): string {
@@ -166,12 +167,12 @@ export default async function TripDetailPage({ params }: TripDetailPageProps) {
                           <span>{safeToFixed(energyConsumed)} km</span>
                           {efficiency && (
                             <span 
-                              className={`text-xs ${
-                                efficiency.isEfficient ? 'text-green-600' : 'text-red-600'
-                              }`}
-                            >
-                              ({efficiency.isEfficient ? '-' : '+'}{safeToFixed(efficiency.diff)}km)
-                            </span>
+                            className={`text-xs ${
+                              efficiency.isEfficient ? TEXT_COLORS.ENERGY_CHARGING : TEXT_COLORS.ENERGY_CONSUMPTION
+                            }`}
+                          >
+                            ({efficiency.isEfficient ? '节省' : '多耗'}{safeToFixed(efficiency.diff)}km)
+                          </span>
                           )}
                         </div>
                       ) : (

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, MapPin, Route } from 'lucide-react'
 import TripCard from '@/components/TripCard'
+import EnergyChangeCard from '@/components/EnergyChangeCard'
 import FootprintMap from '@/components/FootprintMap'
 import type { Trip } from '@/lib/database'
 
@@ -167,8 +168,19 @@ export default function Home() {
           </div>
         ) : (
           <>
-            <div className="grid gap-4">
-              {trips.map((trip) => <TripCard key={trip.id} trip={trip} />)}
+            <div className="grid">
+              {trips.map((trip, index) => (
+                <div key={trip.id}>
+                  <TripCard trip={trip} />
+                  {/* 在两个行程之间插入电耗变化卡片 */}
+                  {index < trips.length - 1 && (
+                    <EnergyChangeCard 
+                      prevTrip={trips[index + 1]} 
+                      nextTrip={trip} 
+                    />
+                  )}
+                </div>
+              ))}
             </div>
 
             {/* 加载更多指示器 */}
