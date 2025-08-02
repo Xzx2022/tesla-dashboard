@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Position } from '@/lib/database'
-import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { X, ZoomIn, ZoomOut, Maximize2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { wgs84ToGcj02 } from '@/lib/coordinate-transform'
 
@@ -117,6 +117,19 @@ export default function TripMap({ positions }: TripMapProps) {
     return map
   }
 
+  // 刷新地图函数
+  const refreshMap = () => {
+    if (mapInstance.current && mapRef.current) {
+      mapInstance.current.destroy();
+      mapInstance.current = createMap(mapRef.current, false);
+    }
+    
+    if (fullscreenMapInstance.current && fullscreenMapRef.current) {
+      fullscreenMapInstance.current.destroy();
+      fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true);
+    }
+  }
+
   useEffect(() => {
     // 设置高德地图安全密钥
     window._AMapSecurityConfig = {
@@ -217,6 +230,17 @@ export default function TripMap({ positions }: TripMapProps) {
       {/* 小地图 */}
       <div className="relative w-full h-full group">
         <div ref={mapRef} className="w-full h-full rounded-lg overflow-hidden" />
+        
+        {/* 刷新按钮 */}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="absolute top-2 right-12 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={refreshMap}
+          title="刷新地图"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
         
         {/* 放大按钮 */}
         <Button

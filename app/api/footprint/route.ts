@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     const carId = searchParams.get('carId')
     const type = searchParams.get('type') || 'cities' // 默认返回城市数据
     const page = parseInt(searchParams.get('page') || '1') // 页码，默认第1页
-    const limit = parseInt(searchParams.get('limit') || '10000') // 每页数量，默认2000条
+    const limit = parseInt(searchParams.get('limit') || '50000') // 每页数量，默认2000条
     const offset = (page - 1) * limit // 偏移量
     
     // 只在运行时执行数据库查询，构建时跳过

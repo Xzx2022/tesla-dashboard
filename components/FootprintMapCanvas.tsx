@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Position } from '@/lib/database'
-import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { X, ZoomIn, ZoomOut, Maximize2, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { wgs84ToGcj02 } from '@/lib/coordinate-transform'
 
@@ -188,6 +188,24 @@ export default function FootprintMap({ positions, loaded = false }: FootprintMap
     }
   }, [drawPolylines])
 
+  // 刷新地图函数
+  const refreshMap = useCallback(() => {
+    // 清空已绘制轨迹ID的记录
+    drawnDriveIdsRef.current.clear();
+    // 清空轨迹线引用
+    polylinesRef.current = [];
+    
+    if (mapInstance.current && mapRef.current) {
+      mapInstance.current.destroy();
+      mapInstance.current = createMap(mapRef.current, false);
+    }
+    
+    if (fullscreenMapInstance.current && fullscreenMapRef.current) {
+      fullscreenMapInstance.current.destroy();
+      fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true);
+    }
+  }, [createMap]);
+
   useEffect(() => {
     // 只有在所有数据加载完成时才初始化地图
     if (!loaded || positions.length === 0) return;
@@ -262,11 +280,19 @@ export default function FootprintMap({ positions, loaded = false }: FootprintMap
     // 延迟初始化全屏地图，确保DOM已渲染
     setTimeout(() => {
       if (window.AMap && fullscreenMapRef.current) {
+        // 清空已绘制轨迹ID的记录
+        drawnDriveIdsRef.current.clear()
+        // 清空轨迹线引用
+        polylinesRef.current = []
         fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true)
       } else if (typeof window.AMap === 'undefined') {
         // 如果AMap尚未加载，加载后再初始化
         loadMapApi().then(() => {
           if (window.AMap && fullscreenMapRef.current) {
+            // 清空已绘制轨迹ID的记录
+            drawnDriveIdsRef.current.clear()
+            // 清空轨迹线引用
+            polylinesRef.current = []
             fullscreenMapInstance.current = createMap(fullscreenMapRef.current, true)
           }
         }).catch(error => {
@@ -321,6 +347,17 @@ export default function FootprintMap({ positions, loaded = false }: FootprintMap
       {/* 小地图 */}
       <div className="relative w-full h-full group">
         <div ref={mapRef} className="w-full h-full rounded-lg overflow-hidden" />
+        
+        {/* 刷新按钮 */}
+        <Button
+          variant="secondary"
+          size="sm"
+          className="absolute top-2 right-12 opacity-0 group-hover:opacity-100 transition-opacity"
+          onClick={refreshMap}
+          title="刷新地图"
+        >
+          <RefreshCw className="h-4 w-4" />
+        </Button>
         
         {/* 放大按钮 */}
         <Button

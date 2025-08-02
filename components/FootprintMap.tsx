@@ -64,11 +64,11 @@ export default function FootprintMap({ selectedCarId }: FootprintMapProps) {
       const url = new URL('/api/footprint', window.location.origin)
       url.searchParams.set('type', 'full') // 获取完整数据包括城市和轨迹
       url.searchParams.set('page', page.toString()) // 页码
-      url.searchParams.set('limit', '10000') // 每页数量
+      url.searchParams.set('limit', '50000') // 每页数量
       if (selectedCarId !== null) {
         url.searchParams.set('carId', selectedCarId.toString())
       }
-
+      
       const response = await fetch(url.toString(), {
         signal: controller.signal
       })

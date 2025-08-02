@@ -129,7 +129,7 @@ export default function TripCard({ trip }: TripCardProps) {
                         efficiency.isEfficient ? 'text-green-500' : 'text-red-500'
                       }`}
                     >
-                      ({efficiency.isEfficient ? '节省' : '多耗'}{safeToFixed(efficiency.diff)}km)
+                      ({efficiency.isEfficient ? '省' : '耗'}{safeToFixed(efficiency.diff)}km)
                     </span>
                     )}
                   </div>

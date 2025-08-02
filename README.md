@@ -160,6 +160,8 @@ docker run -d \
 - **Grafana**: http://localhost:3000 - 专业的数据可视化面板
 - **Tesla Dashboard**: http://localhost:3333 - 现代化的 Tesla 仪表板，专为日常使用优化
 
+先在浏览器访问： http://localhost:4000，设置您的Tesla API tokens，可以参考[TeslaMate FAQ](https://docs.teslamate.org/docs/faq#how-to-generate-your-own-tokens)，设置完成后即可通过 http://localhost:3333 访问TeslaDashboard。
+
 默认情况下，所有服务都绑定到本地主机。如果需要从外部网络访问，请相应地调整 docker-compose.yml 文件中的端口映射。
 
 访问 Tesla Dashboard (http://localhost:3333) 开始体验更直观、更好用的 Tesla 数据可视化。
