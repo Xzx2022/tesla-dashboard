@@ -1,5 +1,5 @@
 # Tesla Dashboard
-folk修复了未知行程问题，<img width="1470" height="791" alt="image" src="https://github.com/user-attachments/assets/a18ecad3-df99-4d22-baeb-d0ecce933f9f" />
+folk修复了未知行程问题，需高德申请web端key和安全密钥，及web服务key。<img width="1470" height="791" alt="image" src="https://github.com/user-attachments/assets/a18ecad3-df99-4d22-baeb-d0ecce933f9f" />
 ![微信图片_20250828235737](https://github.com/user-attachments/assets/6ed69c7e-9004-40b7-9115-7640e93880df)
 修改了lib/amap.ts和docker-compose.yml。
 下载了源代码后解压源代码放在文件夹路径/www/wwwroot/tesla-stack内，cd到路径/www/wwwroot/tesla-stack，运行sudo docker-compose up -d --build就可以了
