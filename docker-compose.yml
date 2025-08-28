@@ -71,8 +71,9 @@ services:
       - DB_PASSWORD=123456
 
       # 高德地图 API 配置 修改为自己的高德API
-      - NEXT_PUBLIC_AMAP_KEY=xxxxx
-
+      - NEXT_PUBLIC_AMAP_KEY=【请填入您的“JS API” Key A (a83808...)】
+      - NEXT_PUBLIC_AMAP_SECURITY_KEY=【请填入Key A对应的安全密钥 (045a8b...)】
+      - AMAP_WEB_SERVICE_KEY=【请填入“Web服务”Key B (bcct039...)】 # <--- 新增的关键变量
       # 时区配置
       - TZ=Asia/Shanghai
 
